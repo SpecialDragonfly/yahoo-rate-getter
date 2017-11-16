@@ -43,7 +43,7 @@ class Service
         string $interval = "1m"
     ) : RateResponse {
         return $this->responseParser->parseStock(
-            $this->repository->get($symbol, $from, $to, $interval)
+            $this->repository->get($symbol, $interval, $from, $to)
         );
     }
 
@@ -55,7 +55,7 @@ class Service
     ) : RateResponse {
         $yahooCurrency = $symbol."=X";
         return $this->responseParser->parseCurrency(
-            $this->repository->get($yahooCurrency, $from, $to, $interval)
+            $this->repository->get($yahooCurrency, $interval, $from, $to)
         );
     }
 }

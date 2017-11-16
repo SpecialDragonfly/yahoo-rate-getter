@@ -63,7 +63,7 @@ RESP;
             ->withScheme('https')
             ->withHost('query1.finance.yahoo.com')
             ->withPath('/v8/finance/chart/')
-            ->withQuery('symbol=X&period1=123&period2=456&interval=1m');
+            ->withQuery('symbol=X&interval=1m&period1=123&period2=456');
         $clientResponse = new Response(200, [], $yahooResponse);
 
         $mockClient = $this->getMockBuilder(Client::class)
@@ -101,7 +101,7 @@ RESP;
             ->withScheme('https')
             ->withHost('query1.finance.yahoo.com')
             ->withPath('/v8/finance/chart/')
-            ->withQuery('symbol=INVALID&period1=123&period2=456&interval=1m');
+            ->withQuery('symbol=INVALID&interval=1m&period1=123&period2=456');
         $clientResponse = new Response(404, [], $yahooResponse);
 
         $mockClient = $this->getMockBuilder(Client::class)
@@ -142,7 +142,7 @@ RESP;
             ->withScheme('https')
             ->withHost('query1.finance.yahoo.com')
             ->withPath('/v8/finance/chart/')
-            ->withQuery('symbol=INVALID&period1=123&period2=456&interval=1m');
+            ->withQuery('symbol=INVALID&interval=1m&period1=123&period2=456');
         $clientResponse = new Response(400, [], $yahooResponse);
 
         $mockClient = $this->getMockBuilder(Client::class)

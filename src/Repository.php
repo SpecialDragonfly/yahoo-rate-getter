@@ -23,21 +23,30 @@ class Repository
     }
 
     /**
-     * @param string $symbol
-     * @param int    $from
-     * @param int    $to
-     * @param string $interval
+     * @param string   $symbol
+     * @param string   $interval
+     * @param int|null $from
+     * @param int|null $to
      *
      * @return ResponseInterface
      */
-    public function get(string $symbol, int $from, int $to, string $interval) : ResponseInterface
-    {
-        $query = http_build_query([
+    public function get(
+        string $symbol,
+        string $interval,
+        $from = null,
+        $to = null
+    ) : ResponseInterface {
+        $parameters = [
             'symbol' => $symbol,
-            'period1' => $from,
-            'period2' => $to,
-            'interval' => $interval
-        ]);
+            'interval' => $interval,
+        ];
+        if ($from !== null) {
+            $parameters['period1'] = $from;
+        }
+        if ($to !== null) {
+            $parameters['period2'] = $to;
+        }
+        $query = http_build_query($parameters);
         $url = "https://query1.finance.yahoo.com/v8/finance/chart/";
 
         return $this->client->get(new Uri($url."?".$query));
