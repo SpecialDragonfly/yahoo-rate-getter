@@ -1,0 +1,34 @@
+{
+    "name": "specialdragonfly/yahoo-rate-getter",
+    "description": "Library for getting rates from Yahoo",
+    "type": "library",
+    "config": {
+        "use-include-path": true
+    },
+    "require": {
+        "guzzlehttp/guzzle": "^6.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "RateGetter\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "tests\\RateGetter\\": "tests/"
+        }
+    },
+    "include-path": [
+        "vendor"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dominic Orme",
+            "email": "Dominic.Orme@googlemail.com"
+        }
+    ]
+}
