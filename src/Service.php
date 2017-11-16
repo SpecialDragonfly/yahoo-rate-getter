@@ -38,7 +38,7 @@ class Service
      */
     public function getStock(
         string $symbol,
-        int $from,
+        int $from = null,
         int $to = null,
         string $interval = "1m"
     ) : RateResponse {
@@ -49,7 +49,7 @@ class Service
 
     public function getCurrency(
         string $symbol,
-        int $from,
+        int $from = null,
         int $to = null,
         string $interval = "1m"
     ) : RateResponse {
