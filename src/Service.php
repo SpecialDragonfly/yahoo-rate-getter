@@ -43,7 +43,8 @@ class Service
         string $interval = "1m"
     ) : RateResponse {
         return $this->responseParser->parseStock(
-            $this->repository->get($symbol, $interval, $from, $to)
+            $this->repository->get($symbol, $interval, $from, $to),
+            $interval
         );
     }
 

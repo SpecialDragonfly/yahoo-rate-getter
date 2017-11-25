@@ -1,7 +1,7 @@
 <?php
 namespace RateGetter\Domain;
 
-class SuccessResponse implements RateResponse
+class AdjustedResponse implements RateResponse
 {
     /**
      * @var array
@@ -20,13 +20,17 @@ class SuccessResponse implements RateResponse
         foreach ($results as $result) {
             $timestamps = $result['timestamp'];
             $quote = $result['indicators']['quote'];
+            $unadjustedClose = $result['indicators']['unadjclose'];
+            $adjustedClose = $result['indicators']['adjclose'];
             for ($i = 0; $i < count($timestamps); $i++) {
                 $responseData[$timestamps[$i]] = new Technicals(
                     $quote[0]['open'][$i],
                     $quote[0]['high'][$i],
                     $quote[0]['low'][$i],
                     $quote[0]['close'][$i],
-                    $quote[0]['volume'][$i]
+                    $quote[0]['volume'][$i],
+                    $unadjustedClose[0]['unadjclose'],
+                    $adjustedClose[0]['adjclose']
                 );
             }
 

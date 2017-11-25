@@ -5,7 +5,9 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Uri;
 use PHPUnit\Framework\TestCase;
+use RateGetter\Domain\AdjustedResponse;
 use RateGetter\Domain\ErrorResponse;
+use RateGetter\Domain\ResultSet;
 use RateGetter\Domain\SuccessResponse;
 use RateGetter\Repository;
 use RateGetter\ResponseParser;
@@ -310,5 +312,88 @@ RESP;
         $this->assertInternalType('array', $response->getData());
         $data = $response->getData();
         $this->assertCount(1, $data, "Response didn't contain a result set");
+    }
+
+    public function testDailyResultsSet()
+    {
+        $symbol = 'X';
+        $from = 123;
+        $to = 456;
+        $yahooResponse = <<<RESP
+{"chart": {
+    "result": [{
+        "meta": {
+            "currency": "GBp",
+            "symbol": "BARC.L",
+            "exchangeName": "LSE",
+            "instrumentType": "EQUITY",
+            "firstTradeDate": 583740900,
+            "gmtoffset": 0,
+            "timezone": "GMT",
+            "exchangeTimezoneName": "Europe/London",
+            "currentTradingPeriod": {
+                "pre": {"timezone": "GMT", "end": 1511510400, "start": 1511507700, "gmtoffset": 0},
+                "regular": {"timezone": "GMT", "end": 1511541000, "start": 1511510400, "gmtoffset": 0},
+                "post": {"timezone": "GMT", "end": 1511543700, "start": 1511541000, "gmtoffset": 0}
+            },
+            "dataGranularity": "1d",
+            "validRanges": ["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]
+        },
+        "timestamp": [1511424000, 1511510400],
+        "indicators": {
+            "quote": [{
+                "high": [189.85000610351562, 189.85000610351562],
+                "open": [187.8000030517578, 189],
+                "volume": [22932407, 69658322],
+                "low": [187.75, 187.8000030517578],
+                "close": [188.75, 189.35000610351562]
+            }],
+            "unadjclose": [{
+                "unadjclose": [188.75, 189.35000610351562]
+            }],
+            "adjclose": [{
+                "adjclose": [188.75, 189.35000610351562]
+            }]
+        }
+    }],
+    "error": null
+}}
+RESP;
+
+        $uri = (new Uri())
+            ->withScheme('https')
+            ->withHost('query1.finance.yahoo.com')
+            ->withPath('/v8/finance/chart/')
+            ->withQuery('symbol=X&interval=1d&period1=123&period2=456');
+        $clientResponse = new Response(200, [], $yahooResponse);
+
+        $mockClient = $this->getMockBuilder(Client::class)
+                           ->setMethods(['get'])
+                           ->disableOriginalConstructor()
+                           ->getMock();
+        $responseParser = new ResponseParser();
+        $repository = new Repository($mockClient);
+        $service = new Service($responseParser, $repository);
+
+        $mockClient
+            ->expects($this->once())
+            ->method('get')
+            ->with($uri)
+            ->willReturn($clientResponse);
+
+        /** @var AdjustedResponse $response */
+        $response = $service->getStock($symbol, $from, $to, "1d");
+        $this->assertInstanceOf(AdjustedResponse::class, $response, "Got: ".get_class($response));
+        $this->assertInternalType('array', $response->getData());
+        $data = $response->getData();
+        $this->assertCount(1, $data, "Response didn't contain a result set");
+        /** @var ResultSet $resultSet */
+        $resultSet = $data[0];
+        $timestamps = $resultSet->getTimes();
+        foreach ($timestamps as $timestamp) {
+            $technicals = $resultSet->getDataForTime($timestamp);
+            $this->assertNotNull($technicals->getUnadjustedClose());
+            $this->assertNotNull($technicals->getAdjustedClose());
+        }
     }
 }

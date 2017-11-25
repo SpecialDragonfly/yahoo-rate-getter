@@ -8,6 +8,14 @@ class Technicals
     private $low;
     private $close;
     private $volume;
+    /**
+     * @var null
+     */
+    private $unadjustedClose;
+    /**
+     * @var null
+     */
+    private $adjustedClose;
 
     /**
      * Technicals constructor.
@@ -16,20 +24,26 @@ class Technicals
      * @param float|null $high
      * @param float|null $low
      * @param float|null $close
-     * @param int|null $volume
+     * @param int|null   $volume
+     * @param float|null $unadjustedClose
+     * @param float|null $adjustedClose
      */
     public function __construct(
         $open = null,
         $high = null,
         $low = null,
         $close = null,
-        $volume = null
+        $volume = null,
+        $unadjustedClose = null,
+        $adjustedClose = null
     ) {
         $this->open = $open;
         $this->high = $high;
         $this->low = $low;
         $this->close = $close;
         $this->volume = $volume;
+        $this->unadjustedClose = $unadjustedClose;
+        $this->adjustedClose = $adjustedClose;
     }
 
     /**
@@ -70,5 +84,21 @@ class Technicals
     public function getVolume()
     {
         return $this->volume;
+    }
+
+    /**
+     * @return null
+     */
+    public function getUnadjustedClose()
+    {
+        return $this->unadjustedClose;
+    }
+
+    /**
+     * @return null
+     */
+    public function getAdjustedClose()
+    {
+        return $this->adjustedClose;
     }
 }

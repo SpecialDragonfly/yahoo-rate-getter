@@ -33,4 +33,14 @@ class ResultSet
     {
         return array_keys($this->timeSeriesData);
     }
+
+    /**
+     * @param string $time
+     *
+     * @return Technicals
+     */
+    public function getDataForTime($time) : Technicals
+    {
+        return $this->timeSeriesData[$time];
+    }
 }
