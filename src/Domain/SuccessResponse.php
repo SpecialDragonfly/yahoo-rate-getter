@@ -4,11 +4,6 @@ namespace RateGetter\Domain;
 class SuccessResponse extends AbstractRateResponse
 {
     /**
-     * @var array
-     */
-    private $data;
-
-    /**
      * SuccessResponse constructor.
      *
      * @param array $data
