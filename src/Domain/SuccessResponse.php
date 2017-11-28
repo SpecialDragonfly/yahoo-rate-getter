@@ -1,7 +1,7 @@
 <?php
 namespace RateGetter\Domain;
 
-class SuccessResponse implements RateResponse
+class SuccessResponse extends AbstractRateResponse
 {
     /**
      * @var array
@@ -15,8 +15,24 @@ class SuccessResponse implements RateResponse
      */
     public function __construct(array $data)
     {
+        $this->data = $data;
+    }
+
+    public function getData() : array
+    {
+        return $this->data;
+    }
+
+    protected function getAllowedFieldNames(): array
+    {
+        return ['open', 'high', 'low', 'close', 'volume'];
+    }
+
+    public function getParsedResultSet(): array
+    {
+        $data = [];
         $responseData = [];
-        $results = $data['chart']['result'];
+        $results = $this->data['chart']['result'];
         foreach ($results as $result) {
             $timestamps = $result['timestamp'];
             $quote = $result['indicators']['quote'];
@@ -30,15 +46,12 @@ class SuccessResponse implements RateResponse
                 );
             }
 
-            $this->data[] = new ResultSet(
+            $data[] = new ResultSet(
                 new Meta($result['meta']),
                 $responseData
             );
         }
-    }
 
-    public function getData() : array
-    {
-        return $this->data;
+        return $data;
     }
 }
