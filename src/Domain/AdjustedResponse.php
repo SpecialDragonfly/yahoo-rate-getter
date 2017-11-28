@@ -51,8 +51,8 @@ class AdjustedResponse extends AbstractRateResponse
                     $quote[0]['low'][$i],
                     $quote[0]['close'][$i],
                     $quote[0]['volume'][$i],
-                    $unadjustedClose[0]['unadjclose'],
-                    $adjustedClose[0]['adjclose']
+                    $unadjustedClose[0]['unadjclose'][$i],
+                    $adjustedClose[0]['adjclose'][$i]
                 );
             }
 
