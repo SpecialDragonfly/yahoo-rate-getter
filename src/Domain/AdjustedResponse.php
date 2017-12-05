@@ -7,10 +7,18 @@ class AdjustedResponse extends AbstractRateResponse
      * SuccessResponse constructor.
      *
      * @param array $data
+     *
+     * @throws \Exception
      */
     public function __construct(array $data)
     {
         $this->data = $data;
+        $results = $this->data['chart']['result'];
+        foreach ($results as $result) {
+            if (!isset($result['timestamp'])) {
+                throw new \Exception("No timeseries data in response");
+            }
+        }
     }
 
     /**
@@ -35,10 +43,14 @@ class AdjustedResponse extends AbstractRateResponse
         $responseData = [];
         $results = $this->data['chart']['result'];
         foreach ($results as $result) {
+            if (!isset($result['timestamp'])) {
+                continue;
+            }
             $timestamps = $result['timestamp'];
-            $quote = $result['indicators']['quote'];
-            $unadjustedClose = $result['indicators']['unadjclose'];
-            $adjustedClose = $result['indicators']['adjclose'];
+            $indicators = $result['indicators'];
+            $quote = $indicators['quote'];
+            $unadjustedClose = $indicators['unadjclose'];
+            $adjustedClose = $indicators['adjclose'];
             for ($i = 0; $i < count($timestamps); $i++) {
                 $responseData[$timestamps[$i]] = new Technicals(
                     $quote[0]['open'][$i],

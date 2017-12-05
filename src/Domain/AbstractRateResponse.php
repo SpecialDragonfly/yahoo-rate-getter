@@ -1,7 +1,7 @@
 <?php
 namespace RateGetter\Domain;
 
-abstract class AbstractRateResponse implements RateResponse
+abstract class AbstractRateResponse implements SuccessResponseInterface
 {
     /** @var array */
     protected $data;
@@ -28,7 +28,7 @@ abstract class AbstractRateResponse implements RateResponse
         if ($field === 'adjclose') {
             $response = $this->getTimeIndexedAdjustedClose();
         }
-        
+
         if ($field === 'unadjclose') {
             $response = $this->getTimeIndexedUnadjustedClose();
         }

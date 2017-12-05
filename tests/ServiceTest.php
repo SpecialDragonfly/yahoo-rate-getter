@@ -236,7 +236,7 @@ RESP;
         $response = $service->getStock($symbol, null, $to);
         $this->assertInstanceOf(SuccessResponse::class, $response, "Got: ".get_class($response));
         $this->assertInternalType('array', $response->getData());
-        $data = $response->getData();
+        $data = $response->getParsedResultSet();
         $this->assertCount(1, $data, "Response didn't contain a result set");
     }
 
@@ -310,7 +310,7 @@ RESP;
         $response = $service->getStock($symbol, $from);
         $this->assertInstanceOf(SuccessResponse::class, $response, "Got: ".get_class($response));
         $this->assertInternalType('array', $response->getData());
-        $data = $response->getData();
+        $data = $response->getParsedResultSet();
         $this->assertCount(1, $data, "Response didn't contain a result set");
     }
 
@@ -385,8 +385,9 @@ RESP;
         $response = $service->getStock($symbol, $from, $to, "1d");
         $this->assertInstanceOf(AdjustedResponse::class, $response, "Got: ".get_class($response));
         $this->assertInternalType('array', $response->getData());
-        $data = $response->getData();
+        $data = $response->getParsedResultSet();
         $this->assertCount(1, $data, "Response didn't contain a result set");
+
         /** @var ResultSet $resultSet */
         $resultSet = $data[0];
         $timestamps = $resultSet->getTimes();
@@ -394,6 +395,71 @@ RESP;
             $technicals = $resultSet->getDataForTime($timestamp);
             $this->assertNotNull($technicals->getUnadjustedClose());
             $this->assertNotNull($technicals->getAdjustedClose());
+        }
+    }
+
+    public function testResponseWithNoQuote()
+    {
+        $symbol = "X";
+        $from = 123;
+        $to = 456;
+        $yahooResponse = <<<RESP
+{"chart":{
+    "result":[{
+        "meta":{
+            "currency":"USD",
+            "symbol":"ACIA.L",
+            "exchangeName":"LSE",
+            "instrumentType":"EQUITY",
+            "firstTradeDate":null,
+            "gmtoffset":0,
+            "timezone":"GMT",
+            "exchangeTimezoneName":"Europe/London",
+            "chartPreviousClose":0.0,
+            "currentTradingPeriod":{
+                "pre":{"timezone":"GMT","end":1512460800,"start":1512458100,"gmtoffset":0},
+                "regular":{"timezone":"GMT","end":1512491400,"start":1512460800,"gmtoffset":0},
+                "post":{"timezone":"GMT","end":1512494100,"start":1512491400,"gmtoffset":0}
+            },
+            "dataGranularity":"3mo",
+            "validRanges":["1d","5d"]
+        },
+        "indicators":{
+            "quote":[{}],
+            "unadjclose":[{}],
+            "adjclose":[{}]
+        }
+    }],
+    "error":null
+}}
+RESP;
+
+        $uri = (new Uri())
+            ->withScheme('https')
+            ->withHost('query1.finance.yahoo.com')
+            ->withPath('/v8/finance/chart/')
+            ->withQuery('symbol=X&interval=1d&period1=123&period2=456');
+        $clientResponse = new Response(200, [], $yahooResponse);
+
+        $mockClient = $this->getMockBuilder(Client::class)
+                           ->setMethods(['get'])
+                           ->disableOriginalConstructor()
+                           ->getMock();
+        $responseParser = new ResponseParser();
+        $repository = new Repository($mockClient);
+        $service = new Service($responseParser, $repository);
+
+        $mockClient
+            ->expects($this->once())
+            ->method('get')
+            ->with($uri)
+            ->willReturn($clientResponse);
+
+        try {
+            $service->getStock($symbol, $from, $to, "1d");
+            $this->fail();
+        } catch (\Exception $ex) {
+            $this->assertEquals("No timeseries data in response", $ex->getMessage());
         }
     }
 }
