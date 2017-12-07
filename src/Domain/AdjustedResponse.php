@@ -1,6 +1,8 @@
 <?php
 namespace RateGetter\Domain;
 
+use RateGetter\Exceptions\InvalidDataException;
+
 class AdjustedResponse extends AbstractRateResponse
 {
     /**
@@ -8,15 +10,17 @@ class AdjustedResponse extends AbstractRateResponse
      *
      * @param array $data
      *
-     * @throws \Exception
+     * @throws InvalidDataException
      */
     public function __construct(array $data)
     {
         $this->data = $data;
         $results = $this->data['chart']['result'];
         foreach ($results as $result) {
-            if (!isset($result['timestamp'])) {
-                throw new \Exception("No timeseries data in response");
+            if (!array_key_exists('timestamp', $result)) {
+                throw new InvalidDataException(
+                    "No timeseries data in response"
+                );
             }
         }
     }

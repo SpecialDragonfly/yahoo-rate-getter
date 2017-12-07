@@ -1,7 +1,10 @@
 <?php
 namespace RateGetter;
 
+use GuzzleHttp\Exception\ClientException;
 use RateGetter\Domain\RateResponse;
+use RateGetter\Exceptions\SymbolNotFoundException;
+use RateGetter\Exceptions\SystemException;
 
 class Service
 {
@@ -17,12 +20,12 @@ class Service
     /**
      * Service constructor.
      *
-     * @param ResponseParser $responseParser
-     * @param Repository     $repository
+     * @param ResponseParser      $responseParser
+     * @param RepositoryInterface $repository
      */
     public function __construct(
         ResponseParser $responseParser,
-        Repository $repository
+        RepositoryInterface $repository
     ) {
         $this->responseParser = $responseParser;
         $this->repository = $repository;
@@ -35,6 +38,7 @@ class Service
      * @param string   $interval
      *
      * @return RateResponse
+     * @throws \Exception
      */
     public function getStock(
         string $symbol,
@@ -42,10 +46,26 @@ class Service
         int $to = null,
         string $interval = "1m"
     ) : RateResponse {
-        return $this->responseParser->parseStock(
-            $this->repository->get($symbol, $interval, $from, $to),
-            $interval
-        );
+        $repoResponse = null;
+        try {
+            $repoResponse = $this->repository->get(
+                $symbol,
+                $interval,
+                $from,
+                $to
+            );
+
+            return $this->responseParser->parseStock(
+                $repoResponse,
+                $interval
+            );
+        } catch (ClientException $ex) {
+            if ($ex->getCode() === 404) {
+                throw new SymbolNotFoundException($symbol, $ex->getCode());
+            }
+
+            throw new SystemException($ex->getMessage(), $ex->getCode());
+        }
     }
 
     public function getCurrency(
