@@ -1,5 +1,5 @@
 <?php
-namespace RateGetter;
+namespace RateGetter\Repository;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Uri;

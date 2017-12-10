@@ -1,13 +1,11 @@
 <?php
-namespace RateGetter;
+namespace RateGetter\Repository;
 
 use GuzzleHttp\Client;
-use function GuzzleHttp\Psr7\parse_response;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Stream;
-use function GuzzleHttp\Psr7\stream_for;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 
 class FileCachedRepository implements RepositoryInterface
 {
@@ -19,11 +17,16 @@ class FileCachedRepository implements RepositoryInterface
      * @var string
      */
     private $dataStore;
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
-    public function __construct(Client $client, string $dataStore)
+    public function __construct(LoggerInterface $logger, Client $client, string $dataStore)
     {
         $this->client = $client;
         $this->dataStore = $dataStore;
+        $this->logger = $logger;
     }
 
     /**
@@ -56,12 +59,12 @@ class FileCachedRepository implements RepositoryInterface
         $filename = $this->dataStore.$symbol."|".$interval."|".$from."|".$to;
         $now = microtime(true);
         if (file_exists($filename)) {
-            var_dump("Getting symbol (c): ".$symbol." in ".(microtime(true) - $now));
+            $this->logger->debug("Getting symbol (c): ".$symbol." in ".(microtime(true) - $now));
             return new Response(200, [], file_get_contents($filename));
         }
 
         $data = $this->client->get(new Uri($url."?".$query));
-        var_dump("Getting symbol (d): ".$symbol." in ".(microtime(true) - $now)."s");
+        $this->logger->debug("Getting symbol (d): ".$symbol." in ".(microtime(true) - $now)."s");
 
         file_put_contents($filename, $data->getBody()->getContents());
         $data->getBody()->rewind();

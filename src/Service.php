@@ -5,6 +5,7 @@ use GuzzleHttp\Exception\ClientException;
 use RateGetter\Domain\RateResponse;
 use RateGetter\Exceptions\SymbolNotFoundException;
 use RateGetter\Exceptions\SystemException;
+use RateGetter\Repository\RepositoryInterface;
 
 class Service
 {
@@ -13,7 +14,7 @@ class Service
      */
     private $responseParser;
     /**
-     * @var Repository
+     * @var RepositoryInterface
      */
     private $repository;
 

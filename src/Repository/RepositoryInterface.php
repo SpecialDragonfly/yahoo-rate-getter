@@ -1,5 +1,5 @@
 <?php
-namespace RateGetter;
+namespace RateGetter\Repository;
 
 use Psr\Http\Message\ResponseInterface;
 
